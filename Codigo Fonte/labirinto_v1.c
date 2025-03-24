@@ -41,13 +41,14 @@ int main(int argc, char** argv){
 		printf("3. Salvar o labirinto resolvido em um arquivo.\n");
 		printf("4. Sair do programa.\n");
 		
-		int modo;
-		scanf("%i", &modo);
+		char enter, modo;
+		scanf("%c", &enter);
+		scanf("%c", &modo);
 
 		switch (modo)
 		{
-			case 3: salvaLabirinto(argv[1], labirinto, n); break;
-			case 4: sair = 1; break;
+			case '3': salvaLabirinto(argv[1], labirinto, n); break;
+			case '4': sair = 1; break;
 			default: printf ("\nValor invalido!\n");
 		}
 	}
