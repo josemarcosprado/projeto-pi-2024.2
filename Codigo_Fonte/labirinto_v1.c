@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+//função feita para salvar o conteúdo de uma matriz num arquivo
 void salvaLabirinto (char* nomeLab, char labirinto[20][20], int linhas, int colunas) {
 	FILE *lab;
 	lab = fopen(strcat(nomeLab, ".txt"), "w");
@@ -21,8 +22,11 @@ void salvaLabirinto (char* nomeLab, char labirinto[20][20], int linhas, int colu
 
 int main(int argc, char** argv){ 
 	
+	//cria as variáveis das dimensões (n, m) e do labirinto em si (labirinto)
 	int n, m;
 	char labirinto[20][20];
+
+	//recebe as dimensões e o labirinto, salvando sem os espaços
 	scanf("%i", &n);
 	scanf("%i", &m);
 	for (int i = 0; i < n; i++){
@@ -31,6 +35,7 @@ int main(int argc, char** argv){
 		}
 	}
 	
+	//imprime o labirinto recebido, com base nas dimensões recebidas (n, m), com espaços
  	printf("\n");
 	for (int i = 0; i < n; i++){
 		printf("%c", labirinto[i][0]);
@@ -39,8 +44,10 @@ int main(int argc, char** argv){
 		}
 	}
 
-	int sair = 0;
+	//"menu" de controle principal do código, após receber o labirinto
+	int sair = 0; //variável tratada como booleana, false até que '4' seja selecionado
 	while (sair == 0){
+		//escreve as opções de uso do programa na tela
 		printf("\n\n");
 	
 		printf("Selecione o modo desejado:\n");
@@ -49,10 +56,12 @@ int main(int argc, char** argv){
 		printf("3. Salvar o labirinto resolvido em um arquivo.\n");
 		printf("4. Sair do programa.\n");
 		
+		//recebe o input do usuário
 		char enter, modo;
 		scanf("%c", &enter);
 		scanf("%c", &modo);
 
+		//processa o input do usuário
 		switch (modo)
 		{
 			case '3': salvaLabirinto(argv[1], labirinto, n, m); break;
