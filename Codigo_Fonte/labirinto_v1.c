@@ -20,6 +20,25 @@ void salvaLabirinto (char* nomeLab, char labirinto[20][20], int linhas, int colu
 	printf("\nArquivo Salvo!\n");
 }
 
+//struct para guardar as informações do personagem
+struct personagem{
+	int posicao[2];
+	int ultposicao[2];
+	int destino[2];
+	};
+
+typedef struct personagem personagem;
+
+//struct para guardar as informações de cada elemento do labirinto
+struct elemento{
+	int posicao[2];
+	int parede;
+	int passado;
+	int inimigo;
+	};
+
+typedef struct elemento elemento;
+
 int main(int argc, char** argv){ 
 	
 	//cria as variáveis das dimensões (n, m) e do labirinto em si (labirinto)
