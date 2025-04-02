@@ -73,7 +73,29 @@ int main(int argc, char** argv){
 			j == m-1 ? printf(" %c\n", labirinto[i][j]) : printf(" %c", labirinto[i][j]);
 		}
 	}
-
+	
+	//Reconhece e imprime os elementos do labirinto (Protótipo)
+	for (int i = 0; i < n; i++){
+		for (int j = 1; j < m; j++){
+			if(labirinto[i][j] == '#'){
+				printf("\nelemento(%i,%i) : Parede", i, j);
+			}
+			else if(labirinto[i][j] == '@'){
+				printf("\nelemento%i,%i: Personagem",i,j );
+			}
+			else if(labirinto[i][j] == '$'){
+				printf("\nelemento%i,%i: Chegada",i,j );
+			}
+			else if(labirinto[i][j] == '.'){
+				printf("\nelemento%i,%i: Caminho",i,j );
+			}
+			else if(labirinto[i][j] == '%'){
+				printf("\nelemento%i,%i: Inimigo",i,j );
+			}
+		}
+	}
+	
+	
 	//"menu" de controle principal do código, após receber o labirinto
 	int sair = 0; //variável tratada como booleana, false até que '4' seja selecionado
 	while (sair == 0){
