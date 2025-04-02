@@ -3,6 +3,36 @@
 #include <stdlib.h>
 #include <string.h>
 
+//struct que define um tipo para trabalharmos com as posições no "grid" do labirinto
+typedef struct {
+	int x;
+	int y;
+	} Vetor2;
+
+//struct para guardar as informações do personagem
+typedef struct {
+	Vetor2 posicao;
+	Vetor2 posicoesant[200];
+	Vetor2 destino;
+	} Personagem;
+
+//struct para guardar as informações de cada elemento do labirinto
+typedef struct {
+	Vetor2 posicao;
+	//esses ints funcionam como booleanos que armazenam o que o elemento do labirinto é e o que ele não é
+	int parede;
+	int chao;
+	int caminhado;
+	int inimigo;
+	int destino;
+	} Elemento;
+
+//função que cria elementos com todos os valores iguais a 0 para padronização
+Elemento criaElementoZerado() {
+	Elemento e = {{0, 0}, 0, 0, 0, 0, 0};
+	return e;
+}
+
 //função feita para salvar o conteúdo de uma matriz num arquivo
 void salvaLabirinto (char* nomeLab, char labirinto[20][20], int linhas, int colunas) {
 	FILE *lab;
@@ -19,25 +49,6 @@ void salvaLabirinto (char* nomeLab, char labirinto[20][20], int linhas, int colu
 	
 	printf("\nArquivo Salvo!\n");
 }
-
-//struct para guardar as informações do personagem
-struct personagem{
-	int posicao[2];
-	int ultposicao[2];
-	int destino[2];
-	};
-
-typedef struct personagem personagem;
-
-//struct para guardar as informações de cada elemento do labirinto
-struct elemento{
-	int posicao[2];
-	int parede;
-	int passado;
-	int inimigo;
-	};
-
-typedef struct elemento elemento;
 
 int main(int argc, char** argv){ 
 	
