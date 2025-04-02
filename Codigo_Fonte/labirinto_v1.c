@@ -32,6 +32,7 @@ Elemento criaElementoZerado() {
 	Elemento e = {{0, 0}, 0, 0, 0, 0, 0};
 	return e;
 }
+//padrao de criação de uma variável "Elemento": Elemento nome_elemento = criaElementoZerado();
 
 //função feita para salvar o conteúdo de uma matriz num arquivo
 void salvaLabirinto (char* nomeLab, char labirinto[20][20], int linhas, int colunas) {
