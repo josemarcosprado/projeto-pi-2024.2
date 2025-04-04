@@ -95,6 +95,7 @@ int main(int argc, char** argv){
 	}
 	
 	//imprime o labirinto recebido, com base nas dimensões recebidas (n, m), com espaços
+	//além disso, aproveita a iteração na matriz do labirinto para classificar seus elementos
  	printf("\n");
 	for (int i = 0, k = 0; i < n; i++){
 		printf("%c", labirinto[i][0]);
