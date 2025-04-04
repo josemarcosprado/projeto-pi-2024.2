@@ -100,10 +100,12 @@ int main(int argc, char** argv){
 	for (int i = 0, k = 0; i < n; i++){
 		printf("%c", labirinto[i][0]);
 		elementos[k] = classificaElemento(labirinto[i][0]);
+		elementos[k].posicao = (Vetor2){i, 0};
 		k++;
 		for (int j = 1; j < m; j++){
 			j == m-1 ? printf(" %c\n", labirinto[i][j]) : printf(" %c", labirinto[i][j]);
 			elementos[k] = classificaElemento(labirinto[i][j]);
+			elementos[k].posicao = (Vetor2){i, j};
 			k++;
 		}
 	}
