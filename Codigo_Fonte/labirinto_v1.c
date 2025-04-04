@@ -1,8 +1,7 @@
-
-// escrever o código fonte do labirinto nesse arquivo aqui
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 //struct que define um tipo para trabalharmos com as posições no "grid" do labirinto
 typedef struct {
@@ -13,24 +12,20 @@ typedef struct {
 //struct para guardar as informações do personagem
 typedef struct {
 	Vetor2 posicao;
-	Vetor2 posicoesant[200];
+	int forca;
 	Vetor2 destino;
 	} Personagem;
-	
-// struct para guardar as informações necessárias do inimigo
-typedef struct {
-        Vetor2 posicao;
-        int potencia;
-		int vida;
-        } Inimigo;
 
 //struct para guardar as informações de cada elemento do labirinto
 typedef struct {
 	Vetor2 posicao;
-	int parede; // esses ints funcionam como booleanos que armazenam o que o elemento do labirinto é e o que ele não é
+	// esses ints funcionam como booleanos que armazenam o que o elemento do labirinto é e o que ele não é
+	int parede;
 	int chao;
 	int caminhado;
 	int destino;
+	int inimigo;
+	int inicio;
 	} Elemento;
 
 //função que cria elementos com todos os valores iguais a 0 para padronização
@@ -39,6 +34,32 @@ Elemento criaElementoZerado() {
 	return e;
 }
 //padrao de criação de uma variável "Elemento": Elemento nome_elemento = criaElementoZerado();
+
+//função para a classificação de cada elemento: retorna o elemento com a instância "booleana" correspondente como 1 (true)
+Elemento classificaElemento (char txtElemento){
+	Elemento e = criaElementoZerado();
+	if (txtElemento == '#') e.parede = 1;
+	else if (txtElemento == '.') e.chao = 1;
+	else if (txtElemento == '$') e.destino = 1;
+	else if (txtElemento == '%') e.inimigo = 1;
+	else if (txtElemento == '@') e.inicio = 1;
+	else printf("\nElemento não reconhecido\n");
+
+	return e;
+}
+
+//Sistema de combate: recebe um ponteiro para personagem e retorna um inteiro - 0 = derrota, 1 = vitória
+int combate (Personagem *heroi) { 
+	srand(time(NULL));  //inicializa o gerador de números aleatórios (seed nova a cada segundo)
+    int roll = (rand() % 10)+1;
+	if ((roll + heroi->forca) > 10) {
+		if (heroi->forca < 10) heroi->forca++;
+		return 1; //vitória no combate
+	} else {
+		return 0; //derota no combate
+	}
+
+}
 
 //função feita para salvar o conteúdo de uma matriz num arquivo
 void salvaLabirinto (char* nomeLab, char labirinto[20][20], int linhas, int colunas) {
@@ -66,6 +87,7 @@ int main(int argc, char** argv){
 	//recebe as dimensões e o labirinto, salvando sem os espaços
 	scanf("%i", &n);
 	scanf("%i", &m);
+	Elemento elementos[n*m];
 	for (int i = 0; i < n; i++){
 		for (int j = 0; j < m; j++){
 			fscanf(stdin, " %c", &labirinto[i][j]);
@@ -74,116 +96,73 @@ int main(int argc, char** argv){
 	
 	//imprime o labirinto recebido, com base nas dimensões recebidas (n, m), com espaços
  	printf("\n");
-	for (int i = 0; i < n; i++){
+	for (int i = 0, k = 0; i < n; i++){
 		printf("%c", labirinto[i][0]);
+		elementos[k] = classificaElemento(labirinto[i][0]);
+		k++;
 		for (int j = 1; j < m; j++){
 			j == m-1 ? printf(" %c\n", labirinto[i][j]) : printf(" %c", labirinto[i][j]);
+			elementos[k] = classificaElemento(labirinto[i][j]);
+			k++;
 		}
 	}
-	
-	// Sistema de combate
-int combate(Personagem *p1, Inimigo *i1) {
-    while (p1-> vida > 0 && i1-> vida > 0) {
-        i1-> vida -= p1-> potencia;
-        if (i1-> vida > 0) {
-            p1-> vida -= i1-> potencia;
-        }
-    }
-    return p1-> vida > 0 ? 1 : 0;
-}
 
-// pra fazer com que o personagem se movimente. 
-void movimento(Personagem *p1, Inimigo *i1, char mtx[20][20], int n,int m) {
-    srand(time(NULL));  // inicializa o gerador de números aleatórios
+// //função pra fazer com que o personagem se movimente. 
+// void movimento(Personagem *p1, Inimigo *i1, char mtx[20][20], int n,int m) {
+//     srand(time(NULL));  //inicializa o gerador de números aleatórios (seed nova a cada segundo)
     
-    while (1) {
-    // Gera direção (0=cima, 1=direita, 2=baixo, 3=esquerda)
-    int direcao = (rand() % 4)+1;
-    p1-> destino.x = p1-> posicao.x;
-    p1-> destino.y = p1-> posicao.y;
-    
-    // Nova posição pela direção
-    switch(direcao) {
-        case 1: p1-> destino.x--; break; // Cima
-        case 2: p1-> destino.y++; break; // Direita
-        case 3: p1-> destino.x++; break; // Baixo
-        case 4: p1-> destino.y--; break; // Esquerda
-    }
+//     while (1) {
+// 		//Gera direção (1=cima, 2=direita, 3=baixo, 4=esquerda)
+// 		int direcao = (rand() % 4)+1;
+// 		p1-> destino.x = p1-> posicao.x;
+// 		p1-> destino.y = p1-> posicao.y;
+		
+// 		// Nova posição pela direção
+// 		switch(direcao) {
+// 			case 1: p1-> destino.x--; break; // Cima
+// 			case 2: p1-> destino.y++; break; // Direita
+// 			case 3: p1-> destino.x++; break; // Baixo
+// 			case 4: p1-> destino.y--; break; // Esquerda
+// 		}
         
-        // Verifica se a nova posição é válida
-        if (p1-> destino.x < 0 || p1-> destino.x >= n || p1-> destino.y < 0 || p1-> destino.y >= m) {
-            continue; // Posição invalida
-        }
+//         // Verifica se a nova posição é válida
+//         if (p1-> destino.x < 0 || p1-> destino.x >= n || p1-> destino.y < 0 || p1-> destino.y >= m) {
+//             continue; // Posição invalida
+//         }
         
-        // Verifica a nova posição
-        if (mtx[p1-> destino.x][p1-> destino.y] == '#') {
-            // Parede 
-            continue;
-        } else if (mtx[p1-> destino.x][p1-> destino.y] == '*') {
-            // Passado do personagem
-            mtx[p1->posicao.x][p1->posicao.y] = '?';
-            break;
-        } else if (mtx[p1-> destino.x][p1-> destino.y] == '%') {
-            // Inimigo
-            int resultado = combate(p1, i1);
-            if (resultado == 0) {
-                mtx[p1-> posicao.x][p1-> posicao.y] = '+';
-                break;
-            } else {
-                mtx[p1-> posicao.x][p1-> posicao.y] = '!';
-                p1-> posicao.x = p1-> destino.x;
-                p1-> posicao.y = p1-> destino.y;
-                mtx[p1-> destino.x][p1-> destino.y] = '@';
-            }
-        } else if (mtx[p1-> destino.x][p1-> destino.y] == '$') {
-            // chegada
-            mtx[p1-> posicao.x][p1-> posicao.y] = 'V';
-            break;
-        } else {
-            // Caminho livre
-            mtx[p1-> posicao.x][p1-> posicao.y] = '*';
-            p1-> posicao.x = p1-> destino.x;
-            p1-> posicao.y = p1-> destino.y;
-            mtx[p1-> destino.x][p1-> destino.y] = '@';
-        }
-    }
-}
-
-	//Reconhece e imprime os elementos do labirinto (Protótipo)
-	for (int i = 0; i < n; i++){
-		for (int j = 1; j < m; j++){
-			if(labirinto[i][j] == '#'){
-				printf("\nelemento(%i,%i) : Parede", i, j);
-			}
-			else if(labirinto[i][j] == '@'){
-				printf("\nelemento%i,%i: Personagem",i,j );
-			}
-			else if(labirinto[i][j] == '?'){
-				printf("\nelemento%i,%i: Personagem perdido",i,j );
-				}	
-			else if(labirinto[i][j] == '+'){
-				printf("\nelemento%i,%i: O personagem morreu",i,j );
-				}	
-			else if(labirinto[i][j] == '!'){
-				printf("\nelemento%i,%i: O personagem ganhou a luta!",i,j );
-				}
-			else if(labirinto[i][j] == 'V'){
-				printf("\nelemento%i,%i: O personagem chegou ao destino!",i,j );
-				}
-			else if(labirinto[i][j] == '*'){
-				printf("\nelemento%i,%i: Passado do Personagem",i,j );
-				}				
-			else if(labirinto[i][j] == '$'){
-				printf("\nelemento%i,%i: Chegada",i,j );
-			}
-			else if(labirinto[i][j] == '.'){
-				printf("\nelemento%i,%i: Caminho",i,j );
-			}
-			else if(labirinto[i][j] == '%'){
-				printf("\nelemento%i,%i: Inimigo",i,j );
-			}
-		}
-	}
+//         // Verifica a nova posição
+//         if (mtx[p1-> destino.x][p1-> destino.y] == '#') {
+//             // Parede 
+//             continue;
+//         } else if (mtx[p1-> destino.x][p1-> destino.y] == '*') {
+//             // Passado do personagem
+//             mtx[p1->posicao.x][p1->posicao.y] = '?';
+//             break;
+//         } else if (mtx[p1-> destino.x][p1-> destino.y] == '%') {
+//             // Inimigo
+//             int resultado = combate(p1, i1);
+//             if (resultado == 0) {
+//                 mtx[p1-> posicao.x][p1-> posicao.y] = '+';
+//                 break;
+//             } else {
+//                 mtx[p1-> posicao.x][p1-> posicao.y] = '!';
+//                 p1-> posicao.x = p1-> destino.x;
+//                 p1-> posicao.y = p1-> destino.y;
+//                 mtx[p1-> destino.x][p1-> destino.y] = '@';
+//             }
+//         } else if (mtx[p1-> destino.x][p1-> destino.y] == '$') {
+//             // chegada
+//             mtx[p1-> posicao.x][p1-> posicao.y] = 'V';
+//             break;
+//         } else {
+//             // Caminho livre
+//             mtx[p1-> posicao.x][p1-> posicao.y] = '*';
+//             p1-> posicao.x = p1-> destino.x;
+//             p1-> posicao.y = p1-> destino.y;
+//             mtx[p1-> destino.x][p1-> destino.y] = '@';
+//         	}
+//     	}
+// 	}
 	
 	//"menu" de controle principal do código, após receber o labirinto
 	
