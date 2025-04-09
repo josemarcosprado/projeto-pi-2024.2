@@ -15,12 +15,6 @@ typedef struct {
 	int forca;
 	Vetor2 destino;
 	} Personagem;
-	
-// definição para a struct inimigo
-typedef struct {
-    Vetor2 posicao;
-    int nivelForca;
-} Inimigo;
 
 //struct para guardar as informações de cada elemento do labirinto
 typedef struct {
@@ -55,7 +49,7 @@ Elemento classificaElemento (char txtElemento){
 }
 
 //Sistema de combate: recebe um ponteiro para personagem e retorna um inteiro - 0 = derrota, 1 = vitória
-int combate (Personagem *heroi) { 
+int combate (Personagem *heroi) {
 	srand(time(NULL));  //inicializa o gerador de números aleatórios (seed nova a cada segundo)
     int roll = (rand() % 10)+1;
 	if ((roll + heroi->forca) > 10) {
@@ -84,24 +78,25 @@ void salvaLabirinto (char* nomeLab, char labirinto[20][20], int linhas, int colu
 	printf("\nArquivo Salvo!\n");
 }
 
- //função pra fazer com que o personagem se movimente
- //Mudança da localização da função de movimento
- //função fora do main para evitar problema de função definida dentro de outra função 
- void movimento(Personagem *p1, Inimigo *i1, char mtx[20][20], int n,int m) {
-     srand(time(NULL));  //inicializa o gerador de números aleatórios (seed nova a cada segundo)
+ //função pra fazer com que o personagem se movimente 
+ void movimento(Personagem *p, Elemento *e, int colunas) {
+    srand(time(NULL));  //inicializa o gerador de números aleatórios (seed nova a cada segundo)
     
     while (1) {
- 		//Gera direção (1=cima, 2=direita, 3=baixo, 4=esquerda)
- 		int direcao = (rand() % 4)+1;
- 		p1-> destino.x = p1-> posicao.x;
- 		p1-> destino.y = p1-> posicao.y;
+		//Vai na matriz de elementos e altera o status do elemento no qual o personagem está pisando para "caminhado"
+ 		e[(p->posicao.x * colunas) + p->posicao.y].caminhado = 1;
+		e[(p->posicao.x * colunas) + p->posicao.y].chao = 0;
+		e[(p->posicao.x * colunas) + p->posicao.y].inicio = 0;
 		
- 		// Nova posição pela direção
+		//Gera direção (1=cima, 2=direita, 3=baixo, 4=esquerda)
+ 		int direcao = (rand() % 4)+1;
+ 		//Nova posição pela direção aleatória		
+		Vetor2 posNova;
  		switch(direcao) {
- 			case 1: p1-> destino.x--; break; // Cima
- 			case 2: p1-> destino.y++; break; // Direita
- 			case 3: p1-> destino.x++; break; // Baixo
- 			case 4: p1-> destino.y--; break; // Esquerda
+ 			case 1: posnova = (Vetor2) {p->posicao.x-1, p->posicao.y}; break; // Cima
+ 			case 2: posnova = (Vetor2) {p->posicao.x, p->posicao.y+1}; break; // Direita
+ 			case 3: posnova = (Vetor2) {p->posicao.x+1, p->posicao.y}; break; // Baixo
+ 			case 4: posnova = (Vetor2) {p->posicao.x, p->posicao.y-1}; break; // Esquerda
  		}
         
          // Verifica se a nova posição é válida
@@ -119,7 +114,7 @@ void salvaLabirinto (char* nomeLab, char labirinto[20][20], int linhas, int colu
              break;
          } else if (mtx[p1-> destino.x][p1-> destino.y] == '%') {
              // Inimigo
-             int resultado = combate(p1);//eliminação de um argumento devido a problema no compilador
+             int resultado = combate(p);//eliminação de um argumento devido a problema no compilador
              if (resultado == 0) {
                  mtx[p1-> posicao.x][p1-> posicao.y] = '+';
                  break;
@@ -152,7 +147,6 @@ int main(int argc, char** argv){
 	//recebe as dimensões e o labirinto, salvando sem os espaços
 	scanf("%i", &n);
 	scanf("%i", &m);
-	Elemento elementos[n*m];
 	for (int i = 0; i < n; i++){
 		for (int j = 0; j < m; j++){
 			fscanf(stdin, " %c", &labirinto[i][j]);
@@ -160,18 +154,17 @@ int main(int argc, char** argv){
 	}
 	
 	//imprime o labirinto recebido, com base nas dimensões recebidas (n, m), com espaços
-	//além disso, aproveita a iteração na matriz do labirinto para classificar seus elementos
+	//além disso, aproveita a iteração na matriz do labirinto para classificar seus elementos	
+	Elemento elementos[n][m];
  	printf("\n");
-	for (int i = 0, k = 0; i < n; i++){
+	for (int i = 0; i < n; i++){
 		printf("%c", labirinto[i][0]);
-		elementos[k] = classificaElemento(labirinto[i][0]);
-		elementos[k].posicao = (Vetor2){i, 0};
-		k++;
+		elementos[i][0] = classificaElemento(labirinto[i][0]);
+		elementos[i][0].posicao = (Vetor2){i, 0};
 		for (int j = 1; j < m; j++){
 			j == m-1 ? printf(" %c\n", labirinto[i][j]) : printf(" %c", labirinto[i][j]);
-			elementos[k] = classificaElemento(labirinto[i][j]);
-			elementos[k].posicao = (Vetor2){i, j};
-			k++;
+			elementos[i][j] = classificaElemento(labirinto[i][j]);
+			elementos[i][j].posicao = (Vetor2){i, j};
 		}
 	}
 	
