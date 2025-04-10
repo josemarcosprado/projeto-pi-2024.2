@@ -78,65 +78,58 @@ void salvaLabirinto (char* nomeLab, char labirinto[20][20], int linhas, int colu
 	printf("\nArquivo Salvo!\n");
 }
 
- //função pra fazer com que o personagem se movimente 
- void movimento(Personagem *p, Elemento *e, int colunas) {
-    srand(time(NULL));  //inicializa o gerador de números aleatórios (seed nova a cada segundo)
-    
-    while (1) {
-		//Vai na matriz de elementos e altera o status do elemento no qual o personagem está pisando para "caminhado"
- 		e[(p->posicao.x * colunas) + p->posicao.y].caminhado = 1;
-		e[(p->posicao.x * colunas) + p->posicao.y].chao = 0;
-		e[(p->posicao.x * colunas) + p->posicao.y].inicio = 0;
-		
-		//Gera direção (1=cima, 2=direita, 3=baixo, 4=esquerda)
- 		int direcao = (rand() % 4)+1;
- 		//Nova posição pela direção aleatória		
-		Vetor2 posNova;
- 		switch(direcao) {
- 			case 1: posnova = (Vetor2) {p->posicao.x-1, p->posicao.y}; break; // Cima
- 			case 2: posnova = (Vetor2) {p->posicao.x, p->posicao.y+1}; break; // Direita
- 			case 3: posnova = (Vetor2) {p->posicao.x+1, p->posicao.y}; break; // Baixo
- 			case 4: posnova = (Vetor2) {p->posicao.x, p->posicao.y-1}; break; // Esquerda
- 		}
-        
-         // Verifica se a nova posição é válida
-         if (p1-> destino.x < 0 || p1-> destino.x >= n || p1-> destino.y < 0 || p1-> destino.y >= m) {
-             continue; // Posição invalida
-         }
-        
-         // Verifica a nova posição
-         if (mtx[p1-> destino.x][p1-> destino.y] == '#') {
-             // Parede 
-             continue;
-         } else if (mtx[p1-> destino.x][p1-> destino.y] == '*') {
-             // Passado do personagem
-             mtx[p1->posicao.x][p1->posicao.y] = '?';
-             break;
-         } else if (mtx[p1-> destino.x][p1-> destino.y] == '%') {
-             // Inimigo
-             int resultado = combate(p);//eliminação de um argumento devido a problema no compilador
-             if (resultado == 0) {
-                 mtx[p1-> posicao.x][p1-> posicao.y] = '+';
-                 break;
-             } else {
-                 mtx[p1-> posicao.x][p1-> posicao.y] = '!';
-                 p1-> posicao.x = p1-> destino.x;
-                 p1-> posicao.y = p1-> destino.y;
-                 mtx[p1-> destino.x][p1-> destino.y] = '@';
-             }
-         } else if (mtx[p1-> destino.x][p1-> destino.y] == '$') {
-             // chegada
-             mtx[p1-> posicao.x][p1-> posicao.y] = 'V';
-             break;
-         } else {
-             // Caminho livre
-             mtx[p1-> posicao.x][p1-> posicao.y] = '*';
-             p1-> posicao.x = p1-> destino.x;
-             p1-> posicao.y = p1-> destino.y;
-            mtx[p1-> destino.x][p1-> destino.y] = '@';
-         	}
-     	}
- 	}
+void embaralhar(int *v, int n) {
+    for (int i = n - 1; i > 0; i--) {
+        int j = rand() % (i + 1); // índice aleatório entre 0 e i
+        // troca v[i] com v[j]
+        int temp = v[i];
+        v[i] = v[j];
+        v[j] = temp;
+    }
+}
+
+//Função responsável por movimentar o personagem aleatoriamente pelo labirinto, até chegar no destino, ou se perder:
+void movimentoAleatorio(Personagem *heroi, Elemento *e, int linhas, int colunas){
+	int perdido = 0; //"booleano" para saber se o herói se perdeu
+	//Enquanto o elemento cuja posição é igual à do herói não for o destino, ele tenta de novo:
+	while(e[(heroi->posicao.x * colunas) + heroi->posicao.y].destino == 0){
+		//gera uma sequência aleatória de tentativas
+		int ordem[] = {1, 2, 3, 4};
+		srand(time(NULL)); //inicia o gerador para embaralhar a ordem de tentativas
+		embaralhar(ordem, 4); //embaralha a lista "ordem"
+		//tenta, na sequencia se movimentar para cada uma das posições
+		Vetor2 posNova = {heroi->posicao.x, heroi->posicao.y}; //vetor inicializado com a posicao atual do heroi
+		int andou = 0; // "booleano" pra saber se o heroi andou ou se perdeu
+		int i = 0; //contador
+		while (andou == 0 && i < 4){		
+			switch (ordem[i]){ //tenta a posição i da ordem aleatória:
+				case 1: posNova.x--; break; //Para cima (Norte)
+				case 2: posNova.y++; break; //Para direita (Leste)
+				case 3: posNova.x++; break; //Para baixo (Sul)
+				case 4: posNova.y--; break; //Para esquerda (Oeste)
+			}
+
+			//verifica se a posição nova é válida (está na matriz e não é parede ou caminho já andado)
+			if (posNova.x >= 0 && posNova.x < linhas && posNova.y >= 0 && posNova.y < colunas && e[(posNova.x * colunas) + posNova.y].parede == 0 && e[(posNova.x * colunas) + posNova.y].caminhado == 0){
+				//caso seja válida:
+				e[(heroi->posicao.x * colunas) + heroi->posicao.y].caminhado = 1; //torna a posição anterior como "caminhada"
+				heroi->posicao = posNova; //move o heroi para a posição nova
+				andou = 1; //"avisa" ao loop que o herói andou, e portanto, pode parar de tentar para essa posição
+			} else {
+				//caso não seja válida:
+				posNova = (Vetor2) {heroi->posicao.x, heroi->posicao.y}; //volta para a posição anterior
+				i++; //aumenta o contador
+			}
+		}
+		if (andou == 0) {
+			//Caso o loop acima termine e o personagem não tenha andado, pressupõe-se que ele se perdeu. Nesse caso:
+			printf("\nO herói se perdeu...\n"); //Imprime que o herói se perdeu
+			perdido = 1; //Torna o "booleano" perdido = true
+			break; //Sai do loop que tenta até chegar no destino
+		}
+	}
+	if (perdido == 0) printf("\nO herói chegou ao destino!\n"); //Caso saia do loop e não tenha se perdido, o herói chegou ao destino!
+}
 	
 int main(int argc, char** argv){ 
 	
@@ -167,7 +160,18 @@ int main(int argc, char** argv){
 			elementos[i][j].posicao = (Vetor2){i, j};
 		}
 	}
-	
+
+	//cria o personagem básico e preenche as informações que ele "sabe" de acordo com cada elemento do struct
+	Personagem heroi = {{0, 0}, 5, {0, 0}}; //posicao do heroi zerada, força = 5 (50% de chance em combate), e posicao do destino zerada
+	for (int i = 0; i < n; i++){
+		for (int j = 0; j < m; j++){
+			if (elementos[i][j].inicio == 1){
+				heroi.posicao = elementos[i][j].posicao; //preenche a posiçao de inicio do heroi
+			} else if (elementos[i][j].destino == 1){
+				heroi.destino = elementos[i][j].posicao; //preenche o destino do heroi
+			}
+		}
+	}
 	//"menu" de controle principal do código, após receber o labirinto
 	
 	int sair = 0; //variável tratada como booleana, false até que '4' seja selecionado
@@ -189,6 +193,7 @@ int main(int argc, char** argv){
 		//processa o input do usuário
 		switch (modo)
 		{
+			case '1': movimentoAleatorio(&heroi, &elementos[0][0], n, m); break;
 			case '3': salvaLabirinto(argv[1], labirinto, n, m); break;
 			case '4': sair = 1; break;
 			default: printf ("\nValor invalido!\n");
