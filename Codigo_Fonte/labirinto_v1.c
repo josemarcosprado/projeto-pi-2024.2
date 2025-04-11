@@ -113,6 +113,7 @@ void pausa(int ms) {
 
 void movimentoAleatorio(Personagem *heroi, Elemento *e, char labirinto[20][20], int linhas, int colunas){
     srand(time(NULL) + rand());
+    int perdeu = 0;  // "booleano" para saber se o herói perdeu a luta
     int perdido = 0; // "booleano" para saber se o herói se perdeu
     
    // Continua enquanto o herói não alcançar o destino
@@ -137,18 +138,51 @@ void movimentoAleatorio(Personagem *heroi, Elemento *e, char labirinto[20][20], 
  // Verifica se o movimento é válido dentro do labirinto
             if (posNova.x >= 0 && posNova.x < linhas && posNova.y >= 0 && posNova.y < colunas &&
                 e[(posNova.x * colunas) + posNova.y].parede == 0 && e[(posNova.x * colunas) + posNova.y].caminhado == 0) {
-                e[(heroi->posicao.x * colunas) + heroi->posicao.y].caminhado = 1;
-                labirinto[heroi->posicao.x][heroi->posicao.y] = '*'; // Marca como caminho percorrido
-                heroi->posicao = posNova; // Atualiza a posição do herói
-                andou = 1; // Indica que o movimento foi bem-sucedido
+                    if (e[(posNova.x * colunas) + posNova.y].inimigo == 1)//Verifica se a próxima posição é um inimigo
+                    {
+                        if(combate(heroi)==1)// Se o combate é vencido o herio segue normalmente
+                        {
+                            e[(heroi->posicao.x * colunas) + heroi->posicao.y].caminhado = 1;//Mesmo sendo um inimigo marca que o heroi já percorreu
+                            labirinto[heroi->posicao.x][heroi->posicao.y] = '!';
+                            heroi->posicao = posNova; // Atualiza a posição do herói
+                            andou = 1; // Indica que o movimento foi bem-sucedido
 
-                pausa(500); // Substitui Sleep 
-                imprimeLabirinto(labirinto, *heroi, linhas, colunas);
-            } else {
+                            pausa(500); // Substitui Sleep 
+                            imprimeLabirinto(labirinto, *heroi, linhas, colunas);
+                        } 
+                        else{
+                            //Se o combate é perdido o jogo acaba
+                            printf("\nO heroi perdeu a luta...\n");
+                            labirinto[posNova.x][posNova.y] = '+';
+                            imprimeLabirinto(labirinto, *heroi, linhas, colunas);
+                            perdeu = 1; // Indica derrota do Personagem
+                            andou = 1; // Impede que a leitura seja que o Personagem se perdeu
+                            break;
+                            
+                        }
+                                    
+                    }
+                    else{
+                        e[(heroi->posicao.x * colunas) + heroi->posicao.y].caminhado = 1;
+                        labirinto[heroi->posicao.x][heroi->posicao.y] = '*'; // Marca como caminho percorrido
+                        heroi->posicao = posNova; // Atualiza a posição do herói
+                        andou = 1; // Indica que o movimento foi bem-sucedido
+
+                        pausa(500); // Substitui Sleep 
+                        imprimeLabirinto(labirinto, *heroi, linhas, colunas);
+                        } 
+                }
+            
+            else {
 				// Se o movimento não é válido, restaura a posição inicial
                 posNova = (Vetor2){heroi->posicao.x, heroi->posicao.y};
                 i++; // Tenta a próxima direção
             }
+        }
+        
+        if(perdeu == 1 ) //Impede que a leitura seja que o Personagem se perdeu
+        {
+            break;
         }
 
         if (andou == 0) {
@@ -158,7 +192,7 @@ void movimentoAleatorio(Personagem *heroi, Elemento *e, char labirinto[20][20], 
         }
     }
 
-    if (perdido == 0) printf("\nO heroi chegou ao destino!\n");
+    if (perdido == 0 && perdeu == 0) printf("\nO heroi chegou ao destino!\n");
 }
 
 int main(int argc, char** argv){ 
