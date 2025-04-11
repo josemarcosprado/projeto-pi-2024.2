@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <windows.h>
 
 //struct que define um tipo para trabalharmos com as posições no "grid" do labirinto
 typedef struct {
@@ -106,55 +105,62 @@ void imprimeLabirinto(char labirinto[20][20], Personagem heroi, int linhas, int 
     printf("\n");
 }
 
-//Função responsável por movimentar o personagem aleatoriamente pelo labirinto, até chegar no destino, ou se perder:
-void movimentoAleatorio(Personagem *heroi, Elemento *e, char labirinto[20][20], int linhas, int colunas){
-	srand(time(NULL) + rand());
-	int perdido = 0; //"booleano" para saber se o herói se perdeu
-	//Enquanto o elemento cuja posição é igual à do herói não for o destino, ele tenta de novo:
-	while(e[(heroi->posicao.x * colunas) + heroi->posicao.y].destino == 0){
-		//gera uma sequência aleatória de tentativas
-		int ordem[] = {1, 2, 3, 4};
-		srand(time(NULL)); //inicia o gerador para embaralhar a ordem de tentativas
-		embaralhar(ordem, 4); //embaralha a lista "ordem"
-		//tenta, na sequencia se movimentar para cada uma das posições
-		Vetor2 posNova = {heroi->posicao.x, heroi->posicao.y}; //vetor inicializado com a posicao atual do heroi
-		int andou = 0; // "booleano" pra saber se o heroi andou ou se perdeu
-		int i = 0; //contador
-		while (andou == 0 && i < 4){		
-			switch (ordem[i]){ //tenta a posição i da ordem aleatória:
-				case 1: posNova.x--; break; //Para cima (Norte)
-				case 2: posNova.y++; break; //Para direita (Leste)
-				case 3: posNova.x++; break; //Para baixo (Sul)
-				case 4: posNova.y--; break; //Para esquerda (Oeste)
-			}
-
-			//verifica se a posição nova é válida (está na matriz e não é parede ou caminho já andado)
-			if (posNova.x >= 0 && posNova.x < linhas && posNova.y >= 0 && posNova.y < colunas && e[(posNova.x * colunas) + posNova.y].parede == 0 && e[(posNova.x * colunas) + posNova.y].caminhado == 0){
-				//caso seja válida:
-				e[(heroi->posicao.x * colunas) + heroi->posicao.y].caminhado = 1; 
-				labirinto[heroi->posicao.x][heroi->posicao.y] = '*'; //torna a posição anterior como "caminhada"
-				heroi->posicao = posNova; //move o heroi para a posição nova
-				andou = 1; //"avisa" ao loop que o herói andou, e portanto, pode parar de tentar para essa posição
-				#ifdef _WIN32 
-					Sleep(500); //Faz a função esperar 500 milissegundos a cada ciclo, tornando a movimentação mais suave
-				#endif
-				imprimeLabirinto(labirinto, *heroi, linhas, colunas); //Imprime o labirinto aonde o personagem irá se movimentar
-			} else {
-				//caso não seja válida:
-				posNova = (Vetor2) {heroi->posicao.x, heroi->posicao.y}; //volta para a posição anterior
-				i++; //aumenta o contador
-			}
-		}
-		if (andou == 0) {
-			//Caso o loop acima termine e o personagem não tenha andado, pressupõe-se que ele se perdeu. Nesse caso:
-			printf("\nO herói se perdeu...\n"); //Imprime que o herói se perdeu
-			perdido = 1; //Torna o "booleano" perdido = true
-			break; //Sai do loop que tenta até chegar no destino
-		}
-	}
-	if (perdido == 0) printf("\nO herói chegou ao destino!\n"); //Caso saia do loop e não tenha se perdido, o herói chegou ao destino!
+// Função que cria uma pausa temporária
+void pausa(int ms) {
+    clock_t inicio = clock(); // Marca o tempo inicial
+    while ((clock() - inicio) < ms * CLOCKS_PER_SEC / 1000); // Aguarda o tempo especificado
 }
-	
+
+void movimentoAleatorio(Personagem *heroi, Elemento *e, char labirinto[20][20], int linhas, int colunas){
+    srand(time(NULL) + rand());
+    int perdido = 0; // "booleano" para saber se o herói se perdeu
+    
+   // Continua enquanto o herói não alcançar o destino
+    while(e[(heroi->posicao.x * colunas) + heroi->posicao.y].destino == 0) {
+        int ordem[] = {1, 2, 3, 4};
+        srand(time(NULL));
+        embaralhar(ordem, 4);
+
+        Vetor2 posNova = {heroi->posicao.x, heroi->posicao.y};
+        int andou = 0;
+        int i = 0;
+
+// Tenta mover o herói até que ele consiga ou esgote as possibilidades
+        while (andou == 0 && i < 4) {
+            switch (ordem[i]) {
+                case 1: posNova.x--; break; // Para cima
+                case 2: posNova.y++; break; // Para direita
+                case 3: posNova.x++; break; // Para baixo
+                case 4: posNova.y--; break; // Para esquerda
+            }
+
+ // Verifica se o movimento é válido dentro do labirinto
+            if (posNova.x >= 0 && posNova.x < linhas && posNova.y >= 0 && posNova.y < colunas &&
+                e[(posNova.x * colunas) + posNova.y].parede == 0 && e[(posNova.x * colunas) + posNova.y].caminhado == 0) {
+                e[(heroi->posicao.x * colunas) + heroi->posicao.y].caminhado = 1;
+                labirinto[heroi->posicao.x][heroi->posicao.y] = '*'; // Marca como caminho percorrido
+                heroi->posicao = posNova; // Atualiza a posição do herói
+                andou = 1; // Indica que o movimento foi bem-sucedido
+
+                pausa(500); // Substitui Sleep 
+                imprimeLabirinto(labirinto, *heroi, linhas, colunas);
+            } else {
+				// Se o movimento não é válido, restaura a posição inicial
+                posNova = (Vetor2){heroi->posicao.x, heroi->posicao.y};
+                i++; // Tenta a próxima direção
+            }
+        }
+
+        if (andou == 0) {
+            printf("\nO heroi se perdeu...\n");
+            perdido = 1;
+            break;
+        }
+    }
+
+    if (perdido == 0) printf("\nO heroi chegou ao destino!\n");
+}
+
 int main(int argc, char** argv){ 
 	
 	//cria as variáveis das dimensões (n, m) e do labirinto em si (labirinto)
