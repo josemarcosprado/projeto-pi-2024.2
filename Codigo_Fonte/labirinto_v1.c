@@ -227,6 +227,34 @@ int main(int argc, char** argv){
 				system("cls"); //Limpa a tela para os comandos e o labirinto inicial sumirem
 				movimentoAleatorio(&heroi, &elementos[0][0], labirinto, n, m); 
 				break;
+			case '2':
+			system("cls");
+			int sucesso = 0; // variável que irá controlar o loop
+			while (sucesso == 0) {
+				// comando para reiniciar o labirinto, resetando os caminhos andados
+				for (int i = 0; i < n; i++) {
+					for (int j = 0; j < m; j++) {
+						if (labirinto[i][j] == '*') {
+							labirinto[i][j] = '.';
+							}
+						elementos[i][j] = classificaElemento(labirinto[i][j]);
+						elementos[i][j].posicao = (Vetor2){i, j};
+					}
+				}
+				// tentativa de fazer o personagem voltar a posição inicial
+				for (int i = 0; i < n; i++) {
+					for (int j = 0; j < m; j++) {
+						if (elementos[i][j].inicio == 1) {
+							heroi.posicao = elementos[i][j].posicao;
+						}
+					}
+				}
+				movimentoAleatorio(&heroi, &elementos[0][0], labirinto, n, m);//função de movimento
+				// no momento em que ele alcança o destino, o loop é interrompido
+				if (heroi.posicao.x == heroi.destino.x && heroi.posicao.y == heroi.destino.y) {
+					sucesso = 1;
+				}
+			}	
 			case '3': salvaLabirinto(argv[1], labirinto, n, m); break;
 			case '4': sair = 1; break;
 			default: printf ("\nValor invalido!\n");
