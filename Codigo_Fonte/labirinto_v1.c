@@ -334,7 +334,10 @@ int main(int argc, char** argv)
 				  } else if (labirinto[i][j] == '!' || labirinto[i][j] == '+')//Limpa os inimigos e faz eles voltarem a ser %
 				  { 
 					labirinto[i][j] = '%';
-				  }
+				  } else if (labirinto[i][j] == 'v')
+				   {
+					   labirinto[i][j] = '$';
+				   }
 				elementos[i][j] = classificaElemento(labirinto[i][j]);
 				elementos[i][j].posicao = (Vetor2){i, j};
 				 }
@@ -360,6 +363,9 @@ int main(int argc, char** argv)
 				   } else if (labirinto[i][j] == '!' || labirinto[i][j] == '+') //Limpa os inimigos e faz eles voltarem a ser %
 				   { 
 					 labirinto[i][j] = '%';
+				   } else if (labirinto[i][j] == 'v')
+				   {
+					   labirinto[i][j] = '$';
 				   }
 				   elementos[i][j] = classificaElemento(labirinto[i][j]);
 				   elementos[i][j].posicao = (Vetor2){i, j};
