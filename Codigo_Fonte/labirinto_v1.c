@@ -142,16 +142,23 @@ int movimentoAleatorio(Personagem *heroi, Elemento *e, char labirinto[20][20], i
 
  // Verifica se o movimento é válido dentro do labirinto
             if (posNova.x >= 0 && posNova.x < linhas && posNova.y >= 0 && posNova.y < colunas &&
-                e[(posNova.x * colunas) + posNova.y].parede == 0 && e[(posNova.x * colunas) + posNova.y].caminhado == 0) {
-                    if (e[(posNova.x * colunas) + posNova.y].inimigo == 1)//Verifica se a próxima posição é um inimigo
+                e[(posNova.x * colunas) + posNova.y].parede == 0 && e[(posNova.x * colunas) + posNova.y].caminhado == 0 &&
+                labirinto[posNova.x][posNova.y] != '*' && labirinto[posNova.x][posNova.y] != '!' &&
+                labirinto[posNova.x][posNova.y] != '+') {
+                    if(labirinto[heroi->posicao.x][heroi->posicao.y] == '.') {
+						labirinto[heroi->posicao.x][heroi->posicao.y] = '*';
+						}
+                    if (e[(posNova.x * colunas) + posNova.y].inimigo == 1)//checa se a proxima posicao é um inimigo
                     {
-                        if(combate(heroi)==1)// Se o combate é vencido o herio segue normalmente
+                        if(combate(heroi)==1)// em caso de vitoria, o personagem segue seu caminho normalmente
                         {
-                            e[(heroi->posicao.x * colunas) + heroi->posicao.y].caminhado = 1;//Mesmo sendo um inimigo marca que o heroi já percorreu
-                            labirinto[heroi->posicao.x][heroi->posicao.y] = '!';
+                            e[(posNova.x * colunas) + posNova.y].inimigo = 0;
+                            e[(posNova.x * colunas) + posNova.y].caminhado = 1;//Mesmo sendo um inimigo marca que o heroi já percorreu
+                            labirinto[posNova.x][posNova.y] = '!'; //atualiza o caractere do inimigo morto
                             heroi->posicao = posNova; // Atualiza a posição do herói
                             andou = 1; // Indica que o movimento foi bem-sucedido
-
+							
+							labirinto[posicaoInicial.x][posicaoInicial.y] = '@';
                             pausa(500); // Substitui Sleep 
                             imprimeLabirinto(labirinto, *heroi, linhas, colunas);
                         } 
@@ -168,12 +175,16 @@ int movimentoAleatorio(Personagem *heroi, Elemento *e, char labirinto[20][20], i
                                     
                     }
                     else{
+						if (labirinto[heroi->posicao.x][heroi->posicao.y] != '!' && labirinto[heroi->posicao.x][heroi->posicao.y] != '+'){
+							labirinto[heroi->posicao.x][heroi->posicao.y] = '*'; // Marca como caminho percorrido
+						}
                         e[(heroi->posicao.x * colunas) + heroi->posicao.y].caminhado = 1;
-                        labirinto[heroi->posicao.x][heroi->posicao.y] = '*'; // Marca como caminho percorrido
+					
                         heroi->posicao = posNova; // Atualiza a posição do herói
                         andou = 1; // Indica que o movimento foi bem-sucedido
-
-                        pausa(500); // Substitui Sleep 
+						
+                        pausa(500); // Substitui Sleep
+                        labirinto[posicaoInicial.x][posicaoInicial.y] = '@'; 
                         imprimeLabirinto(labirinto, *heroi, linhas, colunas);
                         } 
                 }
@@ -197,7 +208,9 @@ int movimentoAleatorio(Personagem *heroi, Elemento *e, char labirinto[20][20], i
         }
     }
 
-    if (perdido == 0 && perdeu == 0) printf("\nO heroi chegou ao destino!\n");
+    if (perdido == 0 && perdeu == 0) {
+		printf("\nO heroi chegou ao destino!\n");
+		}
     
     if (perdeu == 1) return -1; //morreu
     if (perdido == 1) return 0; //se perdeu
@@ -280,9 +293,11 @@ Vetor2 posicaoInicial = heroi.posicao;
 		       // Resetar o labirinto
 		        for (int i = 0; i < n; i++) {
 			     for (int j = 0; j < m; j++) {
-				  if (labirinto[i][j] == '*' || labirinto[i][j] == '!' || labirinto[i][j] == '+') {
+				  if (labirinto[i][j] == '*') {
 					labirinto[i][j] = '.';  // limpa caminhos e mortes
-				}
+				} else if (labirinto[i][j] == '!' || labirinto[i][j] == '+'){ //Limpa os inimigos e faz eles voltarem a ser %
+					labirinto[i][j] = '%';
+					}
 				elementos[i][j] = classificaElemento(labirinto[i][j]);
 				elementos[i][j].posicao = (Vetor2){i, j};
 			}
