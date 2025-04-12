@@ -250,6 +250,8 @@ int main(int argc, char** argv)
 	//cria as variáveis das dimensões (n, m) e do labirinto em si (labirinto)
 	int n, m;
 	char labirinto[20][20];
+	int maxTentativas = 20; //estabelecendo o numero maximo de tentativas permitido
+	int tentativas = 0;
 	printf("Insira o labirinto com suas dimensoes:\n");
 
 	//recebe as dimensões e o labirinto, salvando sem os espaços
@@ -323,7 +325,7 @@ int main(int argc, char** argv)
 		switch (modo)
 		{
 			case '1': 
-				system("cls"); //Limpa a tela para os comandos e o labirinto inicial sumirem
+				heroi.forca = 5; //a cada loop reseta a força inicial do personagem para seu valor inicial de 5
 				for (int i = 0; i < n; i++) 
 				{
 			     for (int j = 0; j < m; j++) 
@@ -349,9 +351,9 @@ int main(int argc, char** argv)
 			break;
 				
 			case '2':
-	            system("cls");
-	            while (sucesso == 0) 
+	            while (sucesso == 0 && tentativas < maxTentativas) 
 	            {
+				heroi.forca = 5; //a cada loop reseta a força inicial do personagem para seu valor inicial de 5
 		        // Resetar o labirinto
 		         for (int i = 0; i < n; i++) 
 		         {
@@ -380,7 +382,14 @@ int main(int argc, char** argv)
 			      if (resultado == 1) 
 			      {
 			        sucesso = 1;
-			      }
+			      } else 
+			      {  
+					  tentativas++;
+				  }
+				}
+				if (tentativas >= maxTentativas) //caso o personagem nao complete o labirinto no numero maximo de tentativas, o programa volta ao menu
+				{
+					printf("\nNumero maximo de tentativas alcancado. O heroi foi incapaz de vencer!\n");
 				}
 			break;
 			case '3': salvaLabirinto(argv[1], labirinto, n, m); break;
