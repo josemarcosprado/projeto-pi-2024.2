@@ -4,7 +4,8 @@
 #include <time.h>
 
 //struct que define um tipo para trabalharmos com as posições no "grid" do labirinto
-typedef struct {
+typedef struct 
+{
 	int x;
 	int y;
 } Vetor2;
@@ -12,14 +13,16 @@ typedef struct {
 	Vetor2 posicaoInicial;  // Isso declara a variável (escopo mais global, será utilizada adiante)
 
 //struct para guardar as informações do personagem
-typedef struct {
+typedef struct 
+{
 	Vetor2 posicao;
 	int forca;
 	Vetor2 destino;
 } Personagem;
 
 //struct para guardar as informações de cada elemento do labirinto
-typedef struct {
+typedef struct 
+{
 	Vetor2 posicao;
 	// esses ints funcionam como booleanos que armazenam o que o elemento do labirinto é e o que ele não é
 	int parede;
@@ -33,14 +36,16 @@ typedef struct {
 
 
 //função que cria elementos com todos os valores iguais a 0 para padronização
-Elemento criaElementoZerado() {
+Elemento criaElementoZerado() 
+{
 	Elemento e = {{0, 0}, 0, 0, 0, 0, 0};
 	return e;
 }
 //padrao de criação de uma variável "Elemento": Elemento nome_elemento = criaElementoZerado();
 
 //função para a classificação de cada elemento: retorna o elemento com a instância "booleana" correspondente como 1 (true)
-Elemento classificaElemento (char txtElemento){
+Elemento classificaElemento (char txtElemento)
+{
 	Elemento e = criaElementoZerado();
 	if (txtElemento == '#') e.parede = 1;
 	else if (txtElemento == '.') e.chao = 1;
@@ -57,10 +62,12 @@ int combate (Personagem *heroi)
 {
 	srand(time(NULL));  //inicializa o gerador de números aleatórios (seed nova a cada segundo)
     int roll = (rand() % 10)+1;
-	if ((roll + heroi->forca) > 10) {
+	if ((roll + heroi->forca) > 10) 
+	{
 		if (heroi->forca < 10) heroi->forca++;
 		return 1; //vitória no combate
-	} else {
+	} else 
+	{
 		return 0; //derota no combate
 	}
 
@@ -75,7 +82,8 @@ void salvaLabirinto (char* nomeLab, char labirinto[20][20], int linhas, int colu
 	for (int i = 0; i < linhas; i++)
 	{
 		fprintf(lab, "%c", labirinto[i][0]);
-		for (int j = 1; j < colunas; j++){
+		for (int j = 1; j < colunas; j++)
+		{
 			j == colunas-1 ? fprintf(lab, " %c\n", labirinto[i][j]) : fprintf(lab, " %c", labirinto[i][j]);
 		}
 	}
