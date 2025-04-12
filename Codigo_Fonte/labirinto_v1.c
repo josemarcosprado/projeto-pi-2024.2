@@ -208,7 +208,7 @@ int movimentoAleatorio(Personagem *heroi, Elemento *e, char labirinto[20][20], i
 						}
                         e[(heroi->posicao.x * colunas) + heroi->posicao.y].caminhado = 1;
 					
-                        heroi->posicao = posNova; // Atualiza a posição do herói
+                        heroi->posicao = posNova;
                         andou = 1; // Indica que o movimento foi bem-sucedido
 						
                         pausa(500); // Substitui Sleep
@@ -361,7 +361,7 @@ int main(int argc, char** argv)
 			case '2':
 	            while (sucesso == 0 && tentativas < maxTentativas) 
 	            {
-				heroi.forca = 5; //a cada loop reseta a força inicial do personagem para seu valor inicial de 5
+				heroi.forca = 5;
 		        // Resetar o labirinto
 		         for (int i = 0; i < n; i++) 
 		         {
@@ -369,8 +369,8 @@ int main(int argc, char** argv)
 			      {
 				   if (labirinto[i][j] == '*' || labirinto[i][j] == '?') 
 				   {
-					 labirinto[i][j] = '.';  // limpa caminhos e mortes
-				   } else if (labirinto[i][j] == '!' || labirinto[i][j] == '+') //Limpa os inimigos e faz eles voltarem a ser %
+					 labirinto[i][j] = '.';
+				   } else if (labirinto[i][j] == '!' || labirinto[i][j] == '+')
 				   { 
 					 labirinto[i][j] = '%';
 				   } else if (labirinto[i][j] == 'v')
@@ -382,7 +382,7 @@ int main(int argc, char** argv)
 				  }
 				}
 
-			      // Volta pra posição inicial salva
+			      
 			      heroi.posicao = posicaoInicial;
 
 			      // Executa a tentativa
